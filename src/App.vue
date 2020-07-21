@@ -1,28 +1,57 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <Header v-if="questions.length" :points="points" />
+    <b-container class="bv-example-row">
+      <b-row>
+        <b-col sm="6" offset="3">
+          <AskBox
+            v-if="questions.length"
+            :currentQuestion="questions[index]"
+            :nextQuestion="nextQuestion"
+            :pointControl="pointControl"
+          />
+        </b-col>
+      </b-row>
+    </b-container>
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import Header from "./components/Header.vue";
+import AskBox from "./components/AskBox";
+
+import { getQuestions } from "./services/getQuestions";
 
 export default {
-  name: 'App',
+  name: "App",
   components: {
-    HelloWorld
-  }
-}
+    Header,
+    AskBox,
+  },
+  data() {
+    return {
+      questions: [],
+      index: 0,
+      points: {
+        gathered: 0,
+        missed: 0,
+        total: 0,
+      },
+    };
+  },
+  methods: {
+    nextQuestion() {
+      this.index++;
+    },
+    pointControl(correct) {
+      correct ? this.points.gathered++ : this.points.missed++;
+    },
+  },
+  beforeCreate: function() {
+    getQuestions().then((res) => {
+      this.questions = res.results;
+      this.points.total = this.questions.length;
+    });
+  },
+};
 </script>
-
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
-</style>
